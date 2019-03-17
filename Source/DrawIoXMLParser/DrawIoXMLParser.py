@@ -3,12 +3,16 @@
 
 import xml.sax
 from Source.DrawIoXMLParser.StateMachineInfo import StateJumpInfo
+from os.path import isfile
 
 SM__STATE_JUMP = "state jump"
 SM__STATE = "state"
 
 
 class StateMachineInfoExtractor:
+    """
+    State Machine information extractor, this class help extract information from draw.io graph
+    """
 
     state_jump_info = []
 
@@ -21,10 +25,20 @@ class StateMachineInfoExtractor:
         self.parser.setContentHandler(self.state_machine_content_handler)
         pass
 
-    def extract(self, file_name):
-        self.parser.parse(file_name)
+    def get_sm_jump_info_list_from_file(self, file_path):
+        """
+        Get state machine information from draw io xml file.
+        :param file_path: path to the file
+        :return:
+        """
+        if isfile(file_path) is False or ".xml" not in file_path:
+            raise ValueError("Invalid input path. expect a xml file with valid path\n")
 
-    def get_sm_jump_info_list(self):
+        # parse the xml file
+        self.parser.parse(file_path)
+
+        # return state jump information list
+        self.state_machine_content_handler.state_jump_list.sort(key=lambda x: x.from_state)
         return self.state_machine_content_handler.state_jump_list
 
     class __StateMachineContentHandler(xml.sax.ContentHandler):
@@ -36,7 +50,9 @@ class StateMachineInfoExtractor:
             self.value = None
             self.source = None
             self.target = None
+            # list containing all state key
             self.state_id_to_key = {}
+            # list containing all state jump information
             self.state_jump_list = []
 
         def startElement(self, tag, attributes):
@@ -55,12 +71,13 @@ class StateMachineInfoExtractor:
         def endElement(self, tag):
             if tag == "mxCell":
                 if self.type == SM__STATE_JUMP:
-                    sm_jump_info = StateJumpInfo()
-                    sm_jump_info.from_state = self.source
-                    sm_jump_info.to_state = self.target
-                    sm_jump_info.condition = self.value.split("<br>")[0]
-                    sm_jump_info.action = self.value.split("<br>")[1]
-                    self.state_jump_list.append(sm_jump_info)
+                    if len(self.value.split("<br>")) == 3:
+                        sm_jump_info = StateJumpInfo()
+                        sm_jump_info.from_state = self.source
+                        sm_jump_info.to_state = self.target
+                        sm_jump_info.condition = self.value.split("<br>")[0]
+                        sm_jump_info.action = self.value.split("<br>")[1]
+                        self.state_jump_list.append(sm_jump_info)
                 elif self.type == SM__STATE:
                     self.state_id_to_key[self.id] = self.value
 
@@ -72,11 +89,3 @@ class StateMachineInfoExtractor:
                     sm_jump_info.to_state = self.state_id_to_key[sm_jump_info.to_state]
                 else:
                     raise RuntimeError("Arrow is not connected properly")
-
-
-sm_e = StateMachineInfoExtractor()
-sm_e.extract("example.xml")
-for list_item in sm_e.get_sm_jump_info_list():
-    print("In state [" + list_item.from_state + "] get condition [" + list_item.condition +
-          "], should do [" + list_item.action + "] and go to state [" + list_item.to_state + "]")
-
