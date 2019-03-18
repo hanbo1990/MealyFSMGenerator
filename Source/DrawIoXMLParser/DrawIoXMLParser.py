@@ -6,6 +6,7 @@ from Source.DrawIoXMLParser.StateMachineInfo import StateJumpInfo
 from os.path import isfile
 
 SM__STATE_JUMP = "state jump"
+SM__STATE_JUMP_PARENT = "state jump parent"
 SM__STATE = "state"
 
 
@@ -45,47 +46,96 @@ class StateMachineInfoExtractor:
 
         def __init__(self):
             super()
-            self.type = None
-            self.id = None
-            self.value = None
-            self.source = None
-            self.target = None
-            # list containing all state key
+            self.xml_item_list = []
             self.state_id_to_key = {}
-            # list containing all state jump information
+            self.currentItem = None
             self.state_jump_list = []
 
         def startElement(self, tag, attributes):
             if tag == "mxCell":
-                if "source" in attributes.keys() and "target" in attributes.keys():
-                    self.value = attributes["value"]
-                    self.type = SM__STATE_JUMP
-                    self.source = attributes["source"]
-                    self.target = attributes["target"]
-                else:
-                    if "value" in attributes.keys():
-                        self.type = SM__STATE
-                        self.id = attributes["id"]
-                        self.value = attributes["value"]
+                self.currentItem = self._XmlItem()
+                if "style" in attributes.keys():
+                    # if the style contains rounded, meaning it's a state
+                    if "whiteSpace" in attributes["style"]:
+                        if "value" in attributes.keys():
+                            self.currentItem.id = attributes["id"]
+                            self.currentItem.type = SM__STATE
+                            self.currentItem.value = attributes["value"]
+                    else:
+                        if "source" in attributes.keys() and "target" in attributes.keys():
+                            if attributes["parent"] == '1':
+                                if "value" in attributes.keys() and attributes["value"] is not "":
+                                    self.currentItem.type = SM__STATE_JUMP
+                                    self.currentItem.value = attributes["value"]
+                                    self.currentItem.source = attributes["source"]
+                                    self.currentItem.target = attributes["target"]
+                                else:
+                                    self.currentItem.id = attributes["id"]
+                                    self.currentItem.type = SM__STATE_JUMP_PARENT
+                                    self.currentItem.source = attributes["source"]
+                                    self.currentItem.target = attributes["target"]
+                                    print( "find parent, "
+                                           + str(self.currentItem.source) +
+                                           self.currentItem.target +
+                                           str(self.currentItem.id))
+                        else:
+                            # it's a line and source, target info is inside its parent
+                            if "value" in attributes.keys() and attributes["parent"] != '1':
+                                self.currentItem.type = SM__STATE_JUMP
+                                self.currentItem.value = attributes["value"]
+                                self.currentItem.parentId = attributes["parent"]
 
         def endElement(self, tag):
             if tag == "mxCell":
-                if self.type == SM__STATE_JUMP:
-                    if len(self.value.split("<br>")) == 3:
-                        sm_jump_info = StateJumpInfo()
-                        sm_jump_info.from_state = self.source
-                        sm_jump_info.to_state = self.target
-                        sm_jump_info.condition = self.value.split("<br>")[0]
-                        sm_jump_info.action = self.value.split("<br>")[1]
-                        self.state_jump_list.append(sm_jump_info)
-                elif self.type == SM__STATE:
-                    self.state_id_to_key[self.id] = self.value
+                if self.currentItem.type == SM__STATE_JUMP:
+                    if len(self.currentItem.value.split("<br>")) == 3:
+                        self.currentItem.condition = self.currentItem.value.split("<br>")[0]
+                        self.currentItem.action = self.currentItem.value.split("<br>")[1]
+                elif self.currentItem.type == SM__STATE:
+                    self.state_id_to_key[self.currentItem.id] = self.currentItem.value
+                else:
+                    pass
+
+                self.xml_item_list.append(self.currentItem)
+                self.currentItem = None
 
         def endDocument(self):
-            for sm_jump_info in self.state_jump_list:
-                if sm_jump_info.from_state in self.state_id_to_key.keys() and\
-                   sm_jump_info.to_state in self.state_id_to_key.keys():
-                    sm_jump_info.from_state = self.state_id_to_key[sm_jump_info.from_state]
-                    sm_jump_info.to_state = self.state_id_to_key[sm_jump_info.to_state]
-                else:
-                    raise RuntimeError("Arrow is not connected properly")
+            for item in self.xml_item_list:
+                if item.type == SM__STATE_JUMP:
+                    state_jump_info = StateJumpInfo()
+                    if item.source is None:
+                        state_jump_info.from_state, state_jump_info.to_state = self._get_from_to_state(item.parentId)
+                    else:
+                        state_jump_info.from_state = item.source
+                        state_jump_info.to_state = item.target
+                    if state_jump_info.from_state is not None:
+                        state_jump_info.action = item.action
+                        state_jump_info.condition = item.condition
+                        state_jump_info.from_state = self.state_id_to_key[state_jump_info.from_state]
+                        state_jump_info.to_state = self.state_id_to_key[state_jump_info.to_state]
+                        self.state_jump_list.append(state_jump_info)
+
+        def _get_from_to_state(self, parent_id):
+            for item in self.xml_item_list:
+                if item.type == SM__STATE_JUMP_PARENT and parent_id == item.id:
+                    return item.source, item.target
+            return None, None
+
+
+        class _XmlItem:
+
+            def __init__(self):
+                self.type = None
+                self.id = None
+                self.parentId = None
+                self.value = None
+
+                self.source = None
+                self.target = None
+
+                self.condition = None
+                self.action = None
+                self.from_state = None
+                self.to_state = None
+
+
