@@ -121,12 +121,16 @@ class CCodeGenerator:
                     if item.action not in self._priv_func_name_list:
                         self._priv_func_name_list.append(item.action)
                 item.from_state = SM_STATE_COMMON + self.__get_str_without_nr(item.from_state)
-                item.condition = SM_CONDI_COMMON + self.__get_str_without_nr(item.condition)
                 item.to_state = SM_STATE_COMMON + self.__get_str_without_nr(item.to_state)
                 if item.from_state not in self._priv_state_name_list:
                     self._priv_state_name_list.append(item.from_state)
                 if item.condition not in self._priv_condi_name_list:
                     self._priv_condi_name_list.append(item.condition)
+                    item.condition = SM_CONDI_COMMON + self.__get_str_without_nr(item.condition)
+
+        self._priv_condi_name_list.sort()
+        for i in range(0, len(self._priv_condi_name_list)):
+            self._priv_condi_name_list[i] = SM_CONDI_COMMON + self.__get_str_without_nr(self._priv_condi_name_list[i])
 
         self._c_file_writer.write(LICENSE)
         self._c_file_writer.write(INCLUDE)
