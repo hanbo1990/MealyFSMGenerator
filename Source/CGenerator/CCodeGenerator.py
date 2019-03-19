@@ -3,7 +3,7 @@ import errno
 from Source.DrawIoXMLParser.StateMachineInfo import StateJumpInfo
 import re
 
-SM_SHORT = "TEMP"
+SM_SHORT = "Reset"
 
 RESULT_PATH = ".." + os.sep + "Result"
 LICENSE = "/**\n\n" \
@@ -40,8 +40,8 @@ TRANS_STATE = "/****************************************************************
               "           STATE MACHINE VARIABLES\n" \
               "*/\n\n"
 
-SM_STATE_COMMON = SM_SHORT + "_STATE__"
-SM_CONDI_COMMON = SM_SHORT + "_CONDITION__"
+SM_STATE_COMMON = SM_SHORT.upper() + "_STATE__"
+SM_CONDI_COMMON = SM_SHORT.upper() + "_CONDITION__"
 
 state_enum_def = SM_SHORT + "State_e"
 condi_enum_def = SM_SHORT + "Condition_e"
@@ -49,16 +49,16 @@ condi_enum_def = SM_SHORT + "Condition_e"
 trans_name_s = SM_SHORT + "Transition_t"
 SM_BASIC_CODE = "typedef void (*ActionType) ( void );\n\n" \
                 "typedef struct{\n" \
-                "\tActionType pActFunc;\n" \
-                "\t" + state_enum_def + " nextState;\n" \
+                "    ActionType pActFunc;\n" \
+                "    " + state_enum_def + " nextState;\n" \
                 "}" + trans_name_s + ";\n\n"
 
 sm_handler_name = SM_SHORT + "Handle"
 sm_handler_s = "typedef struct{\n" \
-             "\tvoid (*process) (void);\n" \
-             "\tvoid (*reset) (void);\n" \
-             "\tuint32_t currentCondition;\n" \
-             "\tuint32_t currentState;\n" \
+             "    void (*process) (void);\n" \
+             "    void (*reset) (void);\n" \
+             "    uint32_t currentCondition;\n" \
+             "    uint32_t currentState;\n" \
              "}StateMachineHandle_t;\n" \
              "\n"
 
@@ -67,10 +67,10 @@ LOCAL_VAR = "/******************************************************************
             "*/\n\n"
 
 sm_handler_var = "static StateMachineHandle_t " + sm_handler_name + " = {\n" \
-                 "\t.process = private_Process,\n" \
-                 "\t.reset = private_Reset,\n" \
-                 "\t.currentState = " + SM_STATE_COMMON + "IDLE,\n" \
-                 "\t.currentCondition = " + SM_CONDI_COMMON + "NONE\n" \
+                 "    .process = private_Process,\n" \
+                 "    .reset = private_Reset,\n" \
+                 "    .currentState = " + SM_STATE_COMMON + "IDLE,\n" \
+                 "    .currentCondition = " + SM_CONDI_COMMON + "NONE\n" \
                  "};\n\n"
 
 PUB_FNC = "/***************************************************************************************************\n" \
@@ -128,7 +128,7 @@ class CCodeGenerator:
                     self._priv_condi_name_list.append(item.condition)
                     item.condition = SM_CONDI_COMMON + self.__get_str_without_nr(item.condition)
 
-        self._priv_condi_name_list.sort()
+        self._priv_condi_name_list.sort(key=lambda x: int(re.findall(r"^\d*", x)[0]))
         for i in range(0, len(self._priv_condi_name_list)):
             self._priv_condi_name_list[i] = SM_CONDI_COMMON + self.__get_str_without_nr(self._priv_condi_name_list[i])
 
@@ -141,15 +141,15 @@ class CCodeGenerator:
         list_nr = len(self._priv_state_name_list)
         self._c_file_writer.write("typedef enum{\n")
         for i in range(0, list_nr):
-            self._c_file_writer.write("\t" + self._priv_state_name_list[i] + ",\n")
-        self._c_file_writer.write("\t" + SM_STATE_COMMON + "END,\n")
+            self._c_file_writer.write("    " + self._priv_state_name_list[i] + ",\n")
+        self._c_file_writer.write("    " + SM_STATE_COMMON + "END,\n")
         self._c_file_writer.write("} " + state_enum_def + ";\n\n")
 
         list_nr = len(self._priv_condi_name_list)
         self._c_file_writer.write("typedef enum{\n")
         for i in range(0, list_nr):
-            self._c_file_writer.write("\t" + self._priv_condi_name_list[i] + ",\n")
-        self._c_file_writer.write("\t" + SM_CONDI_COMMON + "END,\n")
+            self._c_file_writer.write("    " + self._priv_condi_name_list[i] + ",\n")
+        self._c_file_writer.write("    " + SM_CONDI_COMMON + "END,\n")
         self._c_file_writer.write("} " + condi_enum_def + ";\n\n")
 
         # --------------------------------------->Private Functions Declarations
@@ -174,8 +174,8 @@ class CCodeGenerator:
                 item.trans_name = "st" + str(state_trans_nr)
                 state_trans_nr += 1
                 state_trans_str = "static const " + trans_name_s + " " + item.trans_name + " = {\n" \
-                                  "\t.pActFunc = " + item.action + ",\n" \
-                                  "\t.nextState = " + item.to_state + "\n" \
+                                  "    .pActFunc = " + item.action + ",\n" \
+                                  "    .nextState = " + item.to_state + "\n" \
                                   "};\n\n"
                 trans_info_list.append((item.trans_name, item.action, item.to_state))
                 self._c_file_writer.write(state_trans_str)
@@ -189,18 +189,18 @@ class CCodeGenerator:
                                   "// The row is condition and column is state\n/* |")
         # create comment line
         for state_name in self._priv_state_name_list:
-            self._c_file_writer.write("\t" + self.__get_str_without_com_str(state_name) + "\t|")
+            self._c_file_writer.write("    " + self.__get_str_without_com_str(state_name) + "    |")
         self._c_file_writer.write(" */\n")
         for condition_name in self._priv_condi_name_list:
-            self._c_file_writer.write("\t// condition :" + self.__get_str_without_com_str(condition_name) + "\n")
+            self._c_file_writer.write("    // condition :" + self.__get_str_without_com_str(condition_name) + "\n")
             # create transition code for condition with all state
-            condition_stran_line = "\t{"
+            condition_stran_line = "    {"
             for state_name in self._priv_state_name_list:
                 if_trans_exist, trans_name = self.__get_trans_str_name(condition_name, state_name, st_list)
                 if if_trans_exist is True:
-                    condition_stran_line = condition_stran_line + " &" + trans_name + "\t\t,"
+                    condition_stran_line = condition_stran_line + " &" + trans_name + "        ,"
                 else:
-                    condition_stran_line = condition_stran_line + " " + trans_name + "\t\t,"
+                    condition_stran_line = condition_stran_line + " " + trans_name + "        ,"
             condition_stran_line += "},\n"
             condition_stran_line = re.sub(r",}", "}", condition_stran_line)
             self._c_file_writer.write(condition_stran_line)
@@ -209,10 +209,10 @@ class CCodeGenerator:
         # ---------------> local variable
         self._c_file_writer.write(LOCAL_VAR)
         var_str = "static StateMachineHandle_t " + sm_handler_name + " = {\n" \
-                  "\t.process = private_Process,\n" \
-                  "\t.reset = private_Reset,\n" \
-                  "\t.currentState = " + self._priv_state_name_list[0] + ",\n" \
-                  "\t.currentCondition = " + self._priv_state_name_list[0] + "\n" \
+                  "    .process = private_Process,\n" \
+                  "    .reset = private_Reset,\n" \
+                  "    .currentState = " + self._priv_state_name_list[0] + ",\n" \
+                  "    .currentCondition = " + self._priv_state_name_list[0] + "\n" \
                   "};\n\n"
 
         self._c_file_writer.write(sm_handler_var)
@@ -222,13 +222,13 @@ class CCodeGenerator:
         self._c_file_writer.write(PUB_FNC)
         pub_func_str = "void " + SM_SHORT + "_Init( void )\n" \
                        "{\n" \
-                       "\tprivate_Reset();\n" \
+                       "    private_Reset();\n" \
                        "}\n\n"
         self._c_file_writer.write(pub_func_str)
         # execute
         pub_func_str = "void " + SM_SHORT + "_Execute( void )\n" \
                        "{\n" \
-                       "\tprivate_Process();\n" \
+                       "    private_Process();\n" \
                        "}\n\n"
         self._c_file_writer.write(pub_func_str)
 
@@ -237,29 +237,29 @@ class CCodeGenerator:
         # process
         priv_func_str = "void private_Process( void )\n" \
                         "{\n" \
-                        "\t" + trans_name_s + "* currentTransition;\n\n" \
-                        "\t// get current transition of state machine we need to process\n" +\
-                        "\tcurrentTransition = " + SM_SHORT + "TransTable[" + sm_handler_name + ".currentCondition]" +\
-                        "\t" + sm_handler_name + ".currentState];\n\n" +\
-                        "\t" + sm_handler_name + ".currentCondition = " + SM_CONDI_COMMON + "NONE;\n\n" +\
-                        "\t// if it's not NULL\n" +\
-                        "\tif( currentTransition != NULL)\n" \
-                        "\t{\n" +\
-                        "\t\t// update next state to be processed\n" + \
-                        "\t\t" + sm_handler_name + ".currentState = " + "currentTransition->nextState;\n\n" + \
-                        "\t\t//execute the function for this event at state if exist\n" \
-                        "\t\tif(currentTransition->pActFunc != NULL)\n" \
-                        "\t\t{\n" \
-                        "\t\t\tcurrentTransition->pActFunc();\n" \
-                        "\t\t}\n" \
-                        "\t}\n" \
+                        "    const " + trans_name_s + "* currentTransition;\n\n" \
+                        "    // get current transition of state machine we need to process\n" +\
+                        "    currentTransition = " + SM_SHORT + "TransTable[" + sm_handler_name + ".currentCondition][" +\
+                        sm_handler_name + ".currentState];\n\n" +\
+                        "    " + sm_handler_name + ".currentCondition = " + SM_CONDI_COMMON + "NONE;\n\n" +\
+                        "    // if it's not NULL\n" +\
+                        "    if( currentTransition != NULL)\n" \
+                        "    {\n" +\
+                        "        // update next state to be processed\n" + \
+                        "        " + sm_handler_name + ".currentState = " + "currentTransition->nextState;\n\n" + \
+                        "        //execute the function for this event at state if exist\n" \
+                        "        if(currentTransition->pActFunc != NULL)\n" \
+                        "        {\n" \
+                        "            currentTransition->pActFunc();\n" \
+                        "        }\n" \
+                        "    }\n" \
                         "}\n\n"
         self._c_file_writer.write(priv_func_str)
         # reset
         priv_func_str = "void private_Reset( void )\n" \
                         "{\n" +\
-                        "\t" + sm_handler_name + ".currentState = " + self._priv_state_name_list[0] + ";\n" + \
-                        "\t" + sm_handler_name + ".currentCondition = " + self._priv_condi_name_list[0] + ";\n" + \
+                        "    " + sm_handler_name + ".currentState = " + self._priv_state_name_list[0] + ";\n" + \
+                        "    " + sm_handler_name + ".currentCondition = " + self._priv_condi_name_list[0] + ";\n" + \
                         "}\n\n"
         self._c_file_writer.write(priv_func_str)
 
@@ -278,10 +278,9 @@ class CCodeGenerator:
                 return item[0]
         return None
 
-
     @staticmethod
     def __get_str_without_nr(string):
-        return re.sub(r"^[0-9]*", "", string)
+        return re.sub(r"^[0-9]*_*", "", string)
 
     @staticmethod
     def __get_str_without_com_str(string):
