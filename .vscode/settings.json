@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "FSM.C": "cpp",
+        "fsm.h": "c"
+    }
+}

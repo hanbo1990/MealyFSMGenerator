@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import xml.sax
-from Source.DrawIoXMLParser.StateMachineInfo import StateJumpInfo
+from DrawIoXMLParser.StateMachineInfo import StateJumpInfo
 from os.path import isfile
 
 SM__STATE_JUMP = "state jump"

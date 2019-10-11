@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from Source.DrawIoXMLParser.DrawIoXMLParser import StateMachineInfoExtractor
-from Source.CGenerator.CCodeGenerator import CCodeGenerator
+from DrawIoXMLParser.DrawIoXMLParser import StateMachineInfoExtractor
+from CGenerator.CCodeGenerator import CCodeGenerator
 
 
 def main():

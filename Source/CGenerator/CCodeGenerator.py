@@ -1,31 +1,13 @@
 import os
 import errno
-from Source.DrawIoXMLParser.StateMachineInfo import StateJumpInfo
+from DrawIoXMLParser.StateMachineInfo import StateJumpInfo
 import re
 
 SM_SHORT = "Reset"
 
 RESULT_PATH = ".." + os.sep + "Result"
-LICENSE = "/**\n\n" \
-           "This File is generated automatically.\n\n\n\n"\
-           "Copyright <2019> <hanbo1990@gmail.com>\n" \
-           "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and \n" \
-           "associated documentation files (the \"Software\"), to deal in the Software without restriction, including\n"\
-           "without limitation the rights to use, copy,modify, merge, publish, distribute, sublicense, and/or sell \n" \
-           "copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the\n"\
-           "following conditions:\n\n" \
-           "The above copyright notice and this permission notice shall be included in all copies or substantial \n" \
-           "portions of the Software.\n\n" \
-           "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT \n"\
-           "LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO\n"\
-           "EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER\n"\
-           "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR \n"\
-           "THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n" \
-           "*/ \n\n"
 
-INCLUDE = "/***************************************************************************************************\n" \
-          "           INCLUDE\n" \
-          "*/\n\n"
+
 
 ENUM_DEF = "/***************************************************************************************************\n" \
            "           ENUMERATION\n" \
@@ -132,8 +114,8 @@ class CCodeGenerator:
         for i in range(0, len(self._priv_condi_name_list)):
             self._priv_condi_name_list[i] = SM_CONDI_COMMON + self.__get_str_without_nr(self._priv_condi_name_list[i])
 
-        self._c_file_writer.write(LICENSE)
-        self._c_file_writer.write(INCLUDE)
+        # self._c_file_writer.write(LICENSE)
+        # self._c_file_writer.write(INCLUDE)
 
         # --------------------------------------->Enumerations
         self._c_file_writer.write(ENUM_DEF)
