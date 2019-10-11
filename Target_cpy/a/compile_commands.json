@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/workspace/bohan/FSMGenerator/Target_cpy/a",
+    "command": "cc -Idemo@exe -I. -I.. -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ 'demo@exe/Example.c.o' -MF 'demo@exe/Example.c.o.d' -o 'demo@exe/Example.c.o' -c ../Example.c",
+    "file": "../Example.c"
+  }
+]

@@ -1,6 +1,6 @@
 #include "FSM.h"
 
-static FSM_t fsmList[MAX_FSM_NUMBER] = {0};
+static FSM_t fsmList[MAX_FSM_NUMBER];
 static size_t fsmCount = 0;
 
 FSM_t* FSM_New( Transition_t* table, size_t startState, size_t startCondition )
@@ -9,10 +9,10 @@ FSM_t* FSM_New( Transition_t* table, size_t startState, size_t startCondition )
 
     if( fsmCount < MAX_FSM_NUMBER)
     {
-        ret = &(fsmList[++fsmCount]);
+        ret = &(fsmList[fsmCount]);
         fsmList[fsmCount].tableEntry = table;
         fsmList[fsmCount].defaultState = startState;
-        fsmList[fsmCount].defaultCondition = startCondition;
+        fsmList[fsmCount++].defaultCondition = startCondition;
     }
 
     return ret;
