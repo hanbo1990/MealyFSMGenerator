@@ -36,11 +36,19 @@ build PHONY: phony
 
 # Build rules for targets
 
+build demo@exe/main.c.o: c_COMPILER ../main.c
+ DEPFILE = demo@exe/main.c.o.d
+ ARGS = -Idemo@exe -I. -I.. -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g
+
 build demo@exe/Example.c.o: c_COMPILER ../Example.c
  DEPFILE = demo@exe/Example.c.o.d
  ARGS = -Idemo@exe -I. -I.. -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g
 
-build demo: c_LINKER demo@exe/Example.c.o
+build demo@exe/FSM.c.o: c_COMPILER ../FSM.c
+ DEPFILE = demo@exe/FSM.c.o.d
+ ARGS = -Idemo@exe -I. -I.. -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g
+
+build demo: c_LINKER demo@exe/main.c.o demo@exe/Example.c.o demo@exe/FSM.c.o
  LINK_ARGS = -Wl,--no-undefined -Wl,--as-needed
 
 # Test rules

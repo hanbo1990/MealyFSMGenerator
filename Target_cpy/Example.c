@@ -1,31 +1,8 @@
 #include "Example.h"
-#include <stddef.h>
+#include "FSM.h"
+
 #include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-typedef void (*ActionType) ( void );
-
-
-
-typedef struct{
-    ActionType pTransFunc;
-    uint8_t nextState;
-    bool isTransaitionValid;
-}Transition_t;
-
-void ExampleFSM_Private_Reset( void );
-void ExampleFSM_Private_Connect( void );
-void ExampleFSM_Private_CheckIfTImeToConnect( void );
-void ExampleFSM_Private_SayHello( void );
-
-
-ResetState_e currentState;
-ResetCondition_e currentCondition;
-
-/***************************************************************************************************
-           LOCAL VAR
-*/
 typedef enum{ // leave state 0 for tick function to know transaction is not valid
     EXAMPLE_STATE__START,
     EXAMPLE_STATE__CONNECTING,
@@ -42,12 +19,22 @@ typedef enum{
     EXAMPLE_CONDITION__END,
 } ResetCondition_e;
 
+void ExampleFSM_Private_Reset( void );
+void ExampleFSM_Private_Connect( void );
+void ExampleFSM_Private_CheckIfTImeToConnect( void );
+void ExampleFSM_Private_SayHello( void );
+
+FSM_t* smHandler;
+
+/***************************************************************************************************
+           LOCAL VAR
+*/
 
 typedef struct{
     Transition_t transition[EXAMPLE_CONDITION__END];
-}State_t;
+}ExampleState_t;
 
-static const State_t ResetTransTable[EXAMPLE_STATE__END] = {
+static const ExampleState_t ResetTransTable[EXAMPLE_STATE__END] = {
     [EXAMPLE_STATE__START] = {
         .transition = {
             [EXAMPLE_CONDITION__NONE] = {
@@ -85,7 +72,7 @@ static const State_t ResetTransTable[EXAMPLE_STATE__END] = {
         .transition = {
             [EXAMPLE_CONDITION__NONE] = {
                 .pTransFunc = ExampleFSM_Private_SayHello,
-                .nextState = EXAMPLE_STATE__START, 
+                .nextState = EXAMPLE_STATE__CONNECTED, 
                 .isTransaitionValid = true,
             },
         }
@@ -96,56 +83,52 @@ static const State_t ResetTransTable[EXAMPLE_STATE__END] = {
            PUBLIC FUNCTION
 */
 
-void EXAMPLE_Init( void )
+bool EXAMPLE_Init( void )
 {
-    ExampleFSM_Private_Reset();
+    smHandler = FSM_New((void*) ResetTransTable,
+                        sizeof(ExampleState_t),
+                        EXAMPLE_STATE__START,
+                        EXAMPLE_CONDITION__NONE,
+                        EXAMPLE_STATE__START,
+                        EXAMPLE_CONDITION__NONE);
+    
+    return (smHandler == NULL ) ? false : true;
 }
 
 void EXAMPLE_Tick( void )
 {
-    const Transition_t* const currentTransition = &((ResetTransTable[currentState]).transition[currentCondition]);
-
-    currentCondition = EXAMPLE_CONDITION__NONE;
-
-    if( currentTransition->isTransaitionValid == true )
-    {
-        // update next state to be processed
-        currentState = currentTransition->nextState;
-
-        //execute the function for this event at state if exist
-        if(currentTransition->pTransFunc != NULL)
-        {
-            currentTransition->pTransFunc();
-        }
-    }
+    FSM_Tick(smHandler);
 }
+
+
 
 /***************************************************************************************************
            PRIVATE FUNCTION DECLARATION
 */
 void ExampleFSM_Private_Reset( void )
 {
-
+    printf("ExampleFSM_Private_Reset");
 }
 
 void ExampleFSM_Private_Connect( void )
 {
-
+    FSM_UpdateCondition(smHandler, EXAMPLE_CONDITION__CONNECT_SUCCESS);
+    printf("ExampleFSM_Private_Connect");
 }
 
 void ExampleFSM_Private_CheckIfTImeToConnect( void )
 {
-
+    printf("ExampleFSM_Private_CheckIfTImeToConnect");
+    FSM_UpdateCondition(smHandler, EXAMPLE_CONDITION__READY_TO_CONNECT);
 }
 
 void ExampleFSM_Private_SayHello( void )
 {
-
-}
-
-int main( void )
-{
-    printf("func size is %d\n", sizeof(ActionType));
-    printf("transaction size is %ld \n", sizeof(Transition_t));
-    printf("Table Size is %ld\n", sizeof(ResetTransTable));
+    static bool flag = true;
+    if( flag )
+    {
+        printf("ExampleFSM_Private_SayHello");
+        printf("hello");
+        flag = false;
+    }
 }

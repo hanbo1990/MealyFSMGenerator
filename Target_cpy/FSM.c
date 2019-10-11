@@ -3,7 +3,7 @@
 static FSM_t fsmList[MAX_FSM_NUMBER];
 static size_t fsmCount = 0;
 
-FSM_t* FSM_New( Transition_t* table, size_t startState, size_t startCondition )
+FSM_t* FSM_New( void* table, size_t tableLineSize, size_t startState, size_t startCondition, size_t defaultState, size_t defaultCondition )
 {
     FSM_t* ret = NULL;
 
@@ -11,42 +11,39 @@ FSM_t* FSM_New( Transition_t* table, size_t startState, size_t startCondition )
     {
         ret = &(fsmList[fsmCount]);
         fsmList[fsmCount].tableEntry = table;
-        fsmList[fsmCount].defaultState = startState;
-        fsmList[fsmCount++].defaultCondition = startCondition;
+        fsmList[fsmCount].tableLineSize = tableLineSize;
+        fsmList[fsmCount].defaultState = defaultState;
+        fsmList[fsmCount].defaultCondition = defaultCondition;
+        fsmList[fsmCount].currentState = startState;
+        fsmList[fsmCount++].currentCondition = startCondition;
     }
 
     return ret;
 }
 
-void FSM_Tick( FSM_t* fsm )
+void FSM_Tick( FSM_t* self )
 {
-    Transition_t currentTransition = fsm->tableEntry[fsm->currentState][fsm->currentCondition];
+    uint32_t newTransitionOffset = ( self->tableLineSize * self->currentState + 
+                                     self->currentCondition * sizeof(Transition_t) );
 
-    fsm->currentCondition = fsm->defaultCondition;
+    Transition_t* currentTransition = (Transition_t*)((self->tableEntry + newTransitionOffset));
 
-    if( currentTransition != NULL)
+    self->currentCondition = self->defaultCondition;
+
+    if( currentTransition->isTransaitionValid == true )
     {
         // update next state to be processed
-        fsm->currentState = currentTransition->nextState;
+        self->currentState = currentTransition->nextState;
 
         //execute the function for this event at state if exist
-        if(currentTransition->pActFunc != NULL)
+        if(currentTransition->pTransFunc != NULL)
         {
-            currentTransition->pActFunc();
+            currentTransition->pTransFunc();
         }
     }
 }
 
-
-void FSM_UpdateCondition( FSM_t* fsm, size_t newCondition );
-
-void private_Process( void )
+void FSM_UpdateCondition( FSM_t* self, size_t newCondition )
 {
-
-}
-
-void private_Reset( void )
-{
-    ResetHandle.currentState = EXAMPLE_STATE__START;
-    ResetHandle.currentCondition = EXAMPLE_CONDITION__NONE;
+    self->currentCondition = newCondition;
 }

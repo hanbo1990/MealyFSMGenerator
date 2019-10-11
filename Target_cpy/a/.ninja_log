@@ -1,11 +1,5 @@
 # ninja log v5
-0	28	1570794671	demo@exe/Example.c.o	cb2f1bf53548fff9
-28	45	1570794671	demo	4ddada296a7b4fe
-1	31	1570794701	demo@exe/Example.c.o	cb2f1bf53548fff9
-31	47	1570794701	demo	4ddada296a7b4fe
-0	21	1570794927	demo@exe/Example.c.o	cb2f1bf53548fff9
-21	41	1570794927	demo	4ddada296a7b4fe
-1	45	1570795181	demo@exe/Example.c.o	cb2f1bf53548fff9
-45	62	1570795181	demo	4ddada296a7b4fe
-0	32	1570795267	demo@exe/Example.c.o	cb2f1bf53548fff9
-32	52	1570795267	demo	4ddada296a7b4fe
+0	27	1570805674	demo@exe/main.c.o	51b270d7a8ee7d74
+1	35	1570805674	demo@exe/Example.c.o	cb2f1bf53548fff9
+2	36	1570805674	demo@exe/FSM.c.o	ddc6bb550f184a79
+36	54	1570805674	demo	fb99652f3bd24d45

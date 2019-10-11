@@ -1,3 +1,4 @@
+#include <stdbool.h>
 
-void EXAMPLE_Init( void );
+bool EXAMPLE_Init( void );
 void EXAMPLE_Tick( void );
