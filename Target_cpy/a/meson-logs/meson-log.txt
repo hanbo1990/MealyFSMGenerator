@@ -1,4 +1,4 @@
-Build started at 2019-10-11T16:54:32.430124
+Build started at 2019-10-15T09:56:42.753888
 Main binary: /usr/bin/python3
 Python system: Linux
 The Meson build system
@@ -40,8 +40,8 @@ Build machine cpu: x86_64
 Build targets in project: 1
 Found ninja-1.8.2 at /usr/bin/ninja
 Running compile:
-Working directory:  /tmp/tmpsmvtelrv
-Command line:  cc /tmp/tmpsmvtelrv/testfile.c -o /tmp/tmpsmvtelrv/output.obj -pipe -c -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs 
+Working directory:  /tmp/tmprccgi_4w
+Command line:  cc /tmp/tmprccgi_4w/testfile.c -o /tmp/tmprccgi_4w/output.obj -pipe -c -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs 
 
 Code:
  

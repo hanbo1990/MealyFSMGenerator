@@ -1,7 +1,6 @@
 #include "Example.h"
 #include "FSM.h"
 
-#include <stdio.h>
 
 typedef enum{ // leave state 0 for tick function to know transaction is not valid
     EXAMPLE_STATE__START,
@@ -100,25 +99,23 @@ void EXAMPLE_Tick( void )
     FSM_Tick(smHandler);
 }
 
-
-
 /***************************************************************************************************
            PRIVATE FUNCTION DECLARATION
 */
 void ExampleFSM_Private_Reset( void )
 {
-    printf("ExampleFSM_Private_Reset");
+    printf("ExampleFSM_Private_Reset\n");
 }
 
 void ExampleFSM_Private_Connect( void )
 {
     FSM_UpdateCondition(smHandler, EXAMPLE_CONDITION__CONNECT_SUCCESS);
-    printf("ExampleFSM_Private_Connect");
+    printf("ExampleFSM_Private_Connect\n");
 }
 
 void ExampleFSM_Private_CheckIfTImeToConnect( void )
 {
-    printf("ExampleFSM_Private_CheckIfTImeToConnect");
+    printf("ExampleFSM_Private_CheckIfTImeToConnect\n");
     FSM_UpdateCondition(smHandler, EXAMPLE_CONDITION__READY_TO_CONNECT);
 }
 
@@ -127,8 +124,8 @@ void ExampleFSM_Private_SayHello( void )
     static bool flag = true;
     if( flag )
     {
-        printf("ExampleFSM_Private_SayHello");
-        printf("hello");
+        printf("ExampleFSM_Private_SayHello\n");
+        printf("\n\nHello\n\n");
         flag = false;
     }
 }

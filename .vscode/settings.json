@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "FSM.C": "cpp",
-        "fsm.h": "c"
+        "fsm.h": "c",
+        "stddef.h": "c"
     }
 }
