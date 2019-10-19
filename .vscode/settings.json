@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "FSM.C": "cpp",
-        "fsm.h": "c",
-        "stddef.h": "c"
-    }
-}
