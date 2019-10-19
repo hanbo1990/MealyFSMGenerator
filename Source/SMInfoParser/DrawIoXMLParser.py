@@ -1,21 +1,19 @@
-#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
 import xml.sax
-from SMInfoParser.StateMachineInfo import StateJumpInfo
 from os.path import isfile
+from SMInfoParser.StateMachineInfo import StateJumpInfo
+from SMInfoParser.StateMachineInfoParser import SMInfoParser
 
 SM__STATE_JUMP = "state jump"
 SM__STATE_JUMP_PARENT = "state jump parent"
 SM__STATE = "state"
 
 
-class StateMachineInfoExtractor:
+class StateMachineInfoExtractor(SMInfoParser):
     """
     State Machine information extractor, this class help extract information from draw.io graph
     """
-
-    state_jump_info = []
 
     def __init__(self):
         # create a xml sax parser

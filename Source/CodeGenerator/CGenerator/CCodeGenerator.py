@@ -1,12 +1,12 @@
 import os
 import errno
-from SMInfoParser.StateMachineInfo import StateJumpInfo
 import re
 import shutil
 
-from CodeGenerator.CGenerator.CRelatedDefines import (sm_condition_common,
-                                                      sm_state_common,
-                                                      state_enum_type,
+from CodeGenerator.CodeGenerator import (CodeGenerator,
+                                         sm_condition_common,
+                                         sm_state_common)
+from CodeGenerator.CGenerator.CRelatedDefines import (state_enum_type,
                                                       condition_enum_type,
                                                       transition_name,
                                                       state_type,
@@ -18,26 +18,19 @@ from CodeGenerator.CGenerator.CRelatedDefines import (sm_condition_common,
 RESULT_PATH = "Result"
 
 
-class CCodeGenerator:
+class CCodeGenerator(CodeGenerator):
     """
     This file help generates .c and .h code for the state machine
     """
 
-    _sm_name = None
     _func_file_name = None
     _header_file_name = None
     _inc_file_name = None
     _h_file_writer = None
     _c_file_writer = None
-    _priv_func_name_list = []
-    _priv_condi_name_list = []
-    _priv_state_name_list = []
 
     def __init__(self, state_machine_name=None):
-        if state_machine_name is None:
-            raise ValueError("PLease Provide state machine name\n")
-        else:
-            self._sm_name = "Default"
+        super(CCodeGenerator, self).__init__(state_machine_name)
 
         if not os.path.exists(RESULT_PATH):
             try:
@@ -50,9 +43,6 @@ class CCodeGenerator:
         self._header_file_name = self._sm_name + "SMFunc.h"
         self._inc_file_name = self._sm_name + "SMTable.inc"
         self._prepare_dir()
-        self._h_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._header_file_name, 'w+')
-        self._c_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._func_file_name, 'w+')
-        self._table_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._inc_file_name, 'w+')
 
     def write_file(self, st_list):
         """
@@ -82,87 +72,67 @@ class CCodeGenerator:
                 if exc.errno != errno.EEXIST:
                     raise RuntimeError("Cannot create the folder now")
 
-    def _prepare_st_list(self, st_list):
-        # check input
-        assert isinstance(st_list, list)
-        for item in st_list:
-            assert isinstance(item, StateJumpInfo)
-            if item.action is not None:
-                if "NULL" not in item.action:
-                    item.action = "private_SM_" + item.action
-                    if item.action not in self._priv_func_name_list:
-                        self._priv_func_name_list.append(item.action)
-                item.from_state = sm_state_common(self._sm_name) + self.__get_str_without_nr(item.from_state)
-                item.to_state = sm_state_common(self._sm_name) + self.__get_str_without_nr(item.to_state)
-                if item.from_state not in self._priv_state_name_list:
-                    self._priv_state_name_list.append(item.from_state)
-
-                condition_prefix = sm_condition_common(self._sm_name)
-                if item.condition not in self._priv_condi_name_list:
-                    self._priv_condi_name_list.append(item.condition)
-                item.condition = condition_prefix + self.__get_str_without_nr(item.condition)
-
-        self._priv_condi_name_list.sort(key=lambda x: int(re.findall(r"^\d*", x)[0]))
-        for i in range(0, len(self._priv_condi_name_list)):
-            self._priv_condi_name_list[i] = sm_condition_common(self._sm_name) + \
-                                            self.__get_str_without_nr(self._priv_condi_name_list[i])
-
-        for item in st_list:
-            item.print()
-
-        return st_list
-
     def _write_c_file(self):
-        self.__create_include()
-        self.__create_local_variable()
-        self.__create_private_func_define()
-        self.__create_link_to_table()
-        self.__create_private_func_body()
+        c_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._func_file_name, 'w+')
 
-    def __create_link_to_table(self):
-        self._c_file_writer.write("#include \"" + self._inc_file_name + "\"\n")
-        self._c_file_writer.write("\n")
+        self.__create_include(c_file_writer)
+        self.__create_local_variable(c_file_writer)
+        self.__create_private_func_define(c_file_writer)
+        self.__create_link_to_table(c_file_writer)
+        self.__create_private_func_body(c_file_writer)
 
-    def __create_include(self):
-        self._c_file_writer.write("#include \"MealyFSM.h\"\n")
-        self._c_file_writer.write("#include \"" + self._header_file_name + "\"\n")
-        self._c_file_writer.write("\n")
+        c_file_writer.close()
 
-    def __create_local_variable(self):
-        self._c_file_writer.write("\n")
-        self._c_file_writer.write("STATIC FSM_t* smHandler;\n")
-        self._c_file_writer.write("\n")
+    def __create_link_to_table(self, file_descriptor):
+        file_descriptor.write("#include \"" + self._inc_file_name + "\"\n")
+        file_descriptor.write("\n")
 
-    def __create_private_func_define(self):
+    def __create_include(self, file_descriptor):
+        file_descriptor.write("#include \"MealyFSM.h\"\n")
+        file_descriptor.write("#include \"" + self._header_file_name + "\"\n")
+        file_descriptor.write("\n")
+
+    def __create_local_variable(self, file_descriptor):
+        file_descriptor.write("\n")
+        file_descriptor.write("STATIC FSM_t* smHandler;\n")
+        file_descriptor.write("\n")
+
+    def __create_private_func_define(self, file_descriptor):
         for item in self._priv_func_name_list:
-            self._c_file_writer.write("STATIC void " + item + "( void );\n")
+            file_descriptor.write("STATIC void " + item + "( void );\n")
 
-        self._c_file_writer.write("\n")
+        file_descriptor.write("\n")
 
-    def __create_private_func_body(self):
+    def __create_private_func_body(self, file_descriptor):
         for item in self._priv_func_name_list:
             priv_func_str = "STATIC void " + item + "( void ){\n" \
                             "\n" \
                             "}\n\n"
-            self._c_file_writer.write(priv_func_str)
+            file_descriptor.write(priv_func_str)
 
     def _write_header_file(self):
-        self._h_file_writer.write("#ifndef " + header_guard(self._sm_name) + "\n")
-        self._h_file_writer.write("#define " + header_guard(self._sm_name) + "\n")
-        self._h_file_writer.write("\n")
-        self._h_file_writer.write("#include <stdbool.h>\n")
-        self._h_file_writer.write("\n")
-        self._h_file_writer.write("bool " + init_func_name(self._sm_name) + "( void );\n")
-        self._h_file_writer.write("void " + tick_func_name(self._sm_name) + "( void );\n")
-        self._h_file_writer.write("\n")
-        self._h_file_writer.write("#endif\n")
+        h_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._header_file_name, 'w+')
+
+        h_file_writer.write("#ifndef " + header_guard(self._sm_name) + "\n")
+        h_file_writer.write("#define " + header_guard(self._sm_name) + "\n")
+        h_file_writer.write("\n")
+        h_file_writer.write("#include <stdbool.h>\n")
+        h_file_writer.write("\n")
+        h_file_writer.write("bool " + init_func_name(self._sm_name) + "( void );\n")
+        h_file_writer.write("void " + tick_func_name(self._sm_name) + "( void );\n")
+        h_file_writer.write("\n")
+        h_file_writer.write("#endif\n")
+
+        h_file_writer.close()
 
     def _write_inc_file(self, prepared_list):
-        self.__create_enumeration(self._table_file_writer)
-        self.__create_transition_table_line_type(self._table_file_writer)
-        self.__create_table(prepared_list)
-        self.__create_init_func()
-        self.__create_tick_func()
+        table_file_writer = open(RESULT_PATH + os.sep + "src" + os.sep + self._inc_file_name, 'w+')
+
+        self.__create_enumeration(table_file_writer)
+        self.__create_transition_table_line_type(table_file_writer)
+        self.__create_table(table_file_writer, prepared_list)
+        self.__create_init_func(table_file_writer)
+        self.__create_tick_func(table_file_writer)
 
     def __create_enumeration(self, file_descriptor):
         list_nr = len(self._priv_state_name_list)
@@ -186,8 +156,8 @@ class CCodeGenerator:
         file_descriptor.write("}" + state_type(self._sm_name) + ";\n")
         file_descriptor.write("\n")
 
-    def __create_table(self, prepared_list):
-        self._table_file_writer.write("STATIC const " + state_type(self._sm_name) + " " +
+    def __create_table(self, file_descriptor, prepared_list):
+        file_descriptor.write("STATIC const " + state_type(self._sm_name) + " " +
                                       transition_table_name(self._sm_name) + "[" +
                                       sm_state_common(self._sm_name) + "END" + "] = {\n")
 
@@ -199,39 +169,39 @@ class CCodeGenerator:
                     non_empty_state_list.append(item)
 
             if len(non_empty_state_list) != 0:  # if list is not empty
-                self._table_file_writer.write("    [" + state + "] = {\n")
-                self._table_file_writer.write("        .transition = {\n")
+                file_descriptor.write("    [" + state + "] = {\n")
+                file_descriptor.write("        .transition = {\n")
 
                 for item in non_empty_state_list:
-                    self._table_file_writer.write("            [" + item.condition + "] = {\n")
-                    self._table_file_writer.write("                .pTransFunc = " + item.action + ",\n")
-                    self._table_file_writer.write("                .nextState = " + item.to_state + ",\n")
-                    self._table_file_writer.write("                .isTransitionValid = true,\n")
-                    self._table_file_writer.write("            },\n")
+                    file_descriptor.write("            [" + item.condition + "] = {\n")
+                    file_descriptor.write("                .pTransFunc = " + item.action + ",\n")
+                    file_descriptor.write("                .nextState = " + item.to_state + ",\n")
+                    file_descriptor.write("                .isTransitionValid = true,\n")
+                    file_descriptor.write("            },\n")
 
-                self._table_file_writer.write("        },\n")
-                self._table_file_writer.write("    },\n")
+                file_descriptor.write("        },\n")
+                file_descriptor.write("    },\n")
 
             non_empty_state_list = []
 
-        self._table_file_writer.write("};\n")
-        self._table_file_writer.write("\n")
+        file_descriptor.write("};\n")
+        file_descriptor.write("\n")
 
-    def __create_init_func(self):
-        self._table_file_writer.write("bool " + init_func_name(self._sm_name) + "(void){\n")
-        self._table_file_writer.write("    smHandler = FSM_New((void*) " + transition_table_name(self._sm_name) + ",\n")
-        self._table_file_writer.write("                        sizeof(" + state_type(self._sm_name) + "),\n")
-        self._table_file_writer.write("                        " + self._priv_state_name_list[0] + ",\n")
-        self._table_file_writer.write("                        " + self._priv_condi_name_list[0] + ",\n")
-        self._table_file_writer.write("                        " + self._priv_state_name_list[0] + ",\n")
-        self._table_file_writer.write("                        " + self._priv_condi_name_list[0] + ");\n")
-        self._table_file_writer.write("    return (smHandler == NULL ) ? false : true;\n}\n")
-        self._table_file_writer.write("\n")
+    def __create_init_func(self, file_descriptor):
+        file_descriptor.write("bool " + init_func_name(self._sm_name) + "(void){\n")
+        file_descriptor.write("    smHandler = FSM_New((void*) " + transition_table_name(self._sm_name) + ",\n")
+        file_descriptor.write("                        sizeof(" + state_type(self._sm_name) + "),\n")
+        file_descriptor.write("                        " + self._priv_state_name_list[0] + ",\n")
+        file_descriptor.write("                        " + self._priv_condi_name_list[0] + ",\n")
+        file_descriptor.write("                        " + self._priv_state_name_list[0] + ",\n")
+        file_descriptor.write("                        " + self._priv_condi_name_list[0] + ");\n")
+        file_descriptor.write("    return (smHandler == NULL ) ? false : true;\n}\n")
+        file_descriptor.write("\n")
 
-    def __create_tick_func(self):
-        self._table_file_writer.write("void " + tick_func_name(self._sm_name) + "(void){\n")
-        self._table_file_writer.write("    FSM_Tick(smHandler);\n")
-        self._table_file_writer.write("}\n")
+    def __create_tick_func(self, file_descriptor):
+        file_descriptor.write("void " + tick_func_name(self._sm_name) + "(void){\n")
+        file_descriptor.write("    FSM_Tick(smHandler);\n")
+        file_descriptor.write("}\n")
 
     def _copy_default_files(self):
         c_generator_dir = os.path.dirname(os.path.abspath(__file__))
@@ -393,25 +363,3 @@ class CCodeGenerator:
             else:
                 shutil.copy2(s, d)
 
-    @staticmethod
-    def __get_trans_name_from_info_list(action, to_state, trans_info_list):
-        for item in trans_info_list:
-            if action == item[1] and to_state == item[2]:
-                return item[0]
-        return None
-
-    @staticmethod
-    def __get_str_without_nr(string):
-        return re.sub(r"^[0-9]*_*", "", string)
-
-    def __get_str_without_com_str(self, string):
-        string = re.sub(sm_state_common(self._sm_name), "", string)
-        string = re.sub(sm_condition_common(self._sm_name), "", string)
-        return string
-
-    @staticmethod
-    def __get_trans_str_name(condition, state, trans_list):
-        for item in trans_list:
-            if condition == item.condition and state == item.from_state:
-                return True, item.trans_name
-        return False, "NULL"

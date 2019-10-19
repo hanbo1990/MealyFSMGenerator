@@ -53,3 +53,34 @@ class CodeGenerator:
             item.print()
 
         return st_list
+
+    @staticmethod
+    def __get_trans_name_from_info_list(action, to_state, trans_info_list):
+        for item in trans_info_list:
+            if action == item[1] and to_state == item[2]:
+                return item[0]
+        return None
+
+    @staticmethod
+    def __get_str_without_nr(string):
+        return re.sub(r"^[0-9]*_*", "", string)
+
+    def __get_str_without_com_str(self, string):
+        string = re.sub(sm_state_common(self._sm_name), "", string)
+        string = re.sub(sm_condition_common(self._sm_name), "", string)
+        return string
+
+    @staticmethod
+    def __get_trans_str_name(condition, state, trans_list):
+        for item in trans_list:
+            if condition == item.condition and state == item.from_state:
+                return True, item.trans_name
+        return False, "NULL"
+
+
+def sm_state_common(sm_name):
+    return sm_name.upper() + "_STATE__"
+
+
+def sm_condition_common(sm_name):
+    return sm_name.upper() + "_CONDITION__"

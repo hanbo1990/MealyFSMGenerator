@@ -1,12 +1,3 @@
-
-def sm_state_common(sm_name):
-    return sm_name.upper() + "_STATE__"
-
-
-def sm_condition_common(sm_name):
-    return sm_name.upper() + "_CONDITION__"
-
-
 def state_enum_type(sm_name):
     return sm_name + "State_e"
 
