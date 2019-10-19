@@ -19,7 +19,7 @@ class CodeGenerator:
         if state_machine_name is None:
             raise ValueError("PLease Provide state machine name\n")
         else:
-            self._sm_name = "Default"
+            self._sm_name = state_machine_name
 
     def write_file(self, st_list):
         raise NotImplementedError("Please implement in your code generator")

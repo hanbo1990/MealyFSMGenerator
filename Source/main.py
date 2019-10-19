@@ -9,7 +9,7 @@ from CodeGenerator.CGenerator.CCodeGenerator import CCodeGenerator
 def main(argv):
 
     try:
-       opts, args = getopt.getopt(argv,"hi:n", ["ifile=", "sm_name="])
+       opts, args = getopt.getopt(argv, ":i:n:")
     except getopt.GetoptError:
        print('main.py -i <pathToXML> -n <StateMachineName>')
        sys.exit(2)
