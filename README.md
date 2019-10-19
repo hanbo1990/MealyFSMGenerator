@@ -1,5 +1,5 @@
 # MealyFSMGenerator ([Mealy](https://en.wikipedia.org/wiki/Mealy_machine))
-> version: [0.1.0](null)
+> version: [0.1.0](https://github.com/hanbo1990/FSMGenerator/tree/master)
 
 This mealy state machine generator will **generates c code together with its unit test** from [draw.io](https://www.draw.io) graph. The generator is written in a modular way, so it can easily extended to support other languages and other input sources.
 
@@ -12,7 +12,7 @@ Key words used in the state machine generator are **state**, **condition** and *
 
 State machine in draw.io can be created following the example given in below:
 
-![Example](https://lh3.googleusercontent.com/79LyHz-hOjSZwUUlIiSxy1J5TxUlIdGJIOCbkVzu-FUri0TW8bbVvqsrm3hdIXoCoXgOrxVzccZa9Ft8Zr39s2xX88Ml-Xli7OBuHwXfcRzr6C01ZO2YwWX9WY2Czy4AgN4GW4FrDPttZsPhOQ4yuNbvsgVrUErjEpKHaCrM7NfUUo2CHxucLP0T2Js3LeH4K2VG9miufp70T02wrPKVeLCuCSHfmNJ-yvFGf1jg_97jBRxqpwQO854FhQuvYqoOC37m33cAODDTiSlkinFn-9cuIB1ivvGuBvezkNJ2sK1PsT52Z21O-JxEXTEactNy1qEn_ghgHWYi7yT8GfOzsbuXEnEM_32GncdGy5vS-oV_tSlU2nTcJOdDbArKzVIpTuGSiJR_TTqSpV2BpeeMiybHUH9wYRM1ZmmOeHapJQvf2hOtDiBefVUngkac_vpGe6E7aH-xp57BXvJFlY-8oOJuhE9_9eXF9UO3vfSlwUTWRcl6w-VV7kRXnZj8e5WiuDAe8KNhyih6KtzbrnuXjthwfoMriYDTYHlHNyvoFPcX6ZBmoP3CJmnq-iqYnCzOrnUui-3Vt09uf01miW7v1OfgSXcyesgt__IgqNoiHz1YvRWeRj6fqz67XNhzRPHunl8J9wSU0nRzohsVJ2FzDyROlCocLgQRues4g-HFSH7KKoey2ee4bvA=w352-h469-no)
+![Example](https://i.postimg.cc/SQVM4Tzx/example.png)
 
 Patterns to follow:
 > 1. States should start with unique number
@@ -27,7 +27,8 @@ Once the graph is generated, use drawio build-in export function to export the g
 File->Export As->xml
 ```
 **Ｍake sure don't select compressed.**
-![DontUseCompress](https://lh3.googleusercontent.com/1eYsjHon_iV1OkaWqMvx0XCgtRhiI7EJ9CsDWyNTY6oObz8CZnwS2Fu6f-kNQvoYhspR72kL0hZbaimqQre8szUF3EdnZFIRlv6VqYPdgL32nuiyvyZRhZ_uWI6jSPhztDNyLXn14TVItdrmfLCDxsgqTVLboMGfAfax0OQi26Ep6FuM_bTNcq58mtIQe2bCJoD0NVjTN3fJiKVnXRToMrYRAisF4qb9T0PkPzJ2774uqORPNzLahavcY2wBtem6NImc47a8GrEqZxwXxkDF6ouFq7cfgpnTQi5CeJ7yTh2J5fLXTOj2D2KNY-jGqLF5Jg_Sbo2Nqhc-yz16A9t1ffDThnjk692iXDGEy-lkK_0n4vJ5_psa2DPVXxoq6n0zyVs7PD5ywKKuzPaUchbeBrBhinbhQMvLmI8FnsCL2ViNJoFJznnKyDfRP9BHVKP4etIiOn1O8Wzm43j7OBcCw6432-J1JOC4P02WApH29AzKFAq03uIT87G7zyyuGJDUkkJ3JsgZjrcTNM8TMepNcfBRJGczvejK8dJE02DJ8KdufjWhaGMyTiHNJPEMV8CQhcEoAy1nDEkBeZsiLFFXJx80z0XvGDoJCpKOSklXpRB8dyjYc3la31DJujea9MXjFY75kisYRx8ZcDYcwrgg9pxLfLgbh0R0rGP9Z1hXJIpcbKwdBiJRMi8=w369-h246-no)
+
+![DontUseCompress](https://i.postimg.cc/ht0j8hbP/Screenshot-from-2019-10-19-14-03-30.png)
 
 ### Step 2: Generate the code
 
