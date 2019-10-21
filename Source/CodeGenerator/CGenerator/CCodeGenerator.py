@@ -62,6 +62,8 @@ class CCodeGenerator(CodeGenerator):
         self.__mkdir(RESULT_PATH)
         self.__mkdir(RESULT_PATH + os.sep + "src")
         self.__mkdir(RESULT_PATH + os.sep + "src" + os.sep + "fsmMgr")
+        self.__mkdir(RESULT_PATH + os.sep + "unit_test")
+        self.__mkdir(RESULT_PATH + os.sep + "unit_test" + os.sep + "test")
 
     @staticmethod
     def __mkdir(path):

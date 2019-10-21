@@ -1,0 +1,14 @@
+image:
+  name: hanbo1990/fsm:v0.1.0
+
+pipelines:
+  default:
+    - step:
+        name: execute_example_and_test
+        max-time: 10
+        artifacts: # defining the artifacts to be passed to each future step.
+          - Result/*
+        script:
+          - python3 Source/main.py -i Example/example.xml -n Example
+          - cd Result/unit_test
+          - ceedling test:all

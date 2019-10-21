@@ -5,4 +5,4 @@ ENV['COMPILER_ROOT'] = "C:/Program Files\ \(x86\)/Microchip/xc32/v2.10/"
 
 Ceedling.load_project
 
-task :default => %w[ clobber test:all gcov:all]
+task :default => %w[ clobber test:all]

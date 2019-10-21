@@ -90,5 +90,5 @@
     - module_generator
     - raw_output_report
     - xml_tests_report
-    - gcov
+    # - gcov
 ...
