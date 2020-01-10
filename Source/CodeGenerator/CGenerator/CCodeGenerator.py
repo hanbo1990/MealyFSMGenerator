@@ -191,7 +191,7 @@ class CCodeGenerator(CodeGenerator):
 
     def __create_init_func(self, file_descriptor):
         file_descriptor.write("bool " + init_func_name(self._sm_name) + "(void){\n")
-        file_descriptor.write("    smHandler = FSM_New((void*) " + transition_table_name(self._sm_name) + ",\n")
+        file_descriptor.write("    smHandler = M_FSM_New((void*) " + transition_table_name(self._sm_name) + ",\n")
         file_descriptor.write("                        sizeof(" + state_type(self._sm_name) + "),\n")
         file_descriptor.write("                        " + self._priv_state_name_list[0] + ",\n")
         file_descriptor.write("                        " + self._priv_condi_name_list[0] + ",\n")
@@ -202,7 +202,7 @@ class CCodeGenerator(CodeGenerator):
 
     def __create_tick_func(self, file_descriptor):
         file_descriptor.write("void " + tick_func_name(self._sm_name) + "(void){\n")
-        file_descriptor.write("    FSM_Tick(smHandler);\n")
+        file_descriptor.write("    M_FSM_Tick(smHandler);\n")
         file_descriptor.write("}\n")
 
     def _copy_default_files(self):
@@ -249,7 +249,7 @@ class CCodeGenerator(CodeGenerator):
                                     "\n")
         utest_file_descriptor.write("void test_InitFailed(void)\n"
                                     "{\n"
-                                    "    FSM_New_ExpectAnyArgsAndReturn(NULL);\n"
+                                    "    M_FSM_New_ExpectAnyArgsAndReturn(NULL);\n"
                                     "\n"
                                     "    TEST_ASSERT_EQUAL(false, " + self._sm_name + "_Init());\n"
                                     "}\n"
@@ -257,14 +257,14 @@ class CCodeGenerator(CodeGenerator):
                                     "void test_InitSuccess(void)\n"
                                     "{\n"
                                     "    FSM_t fsm;\n"
-                                    "    FSM_New_ExpectAnyArgsAndReturn(&fsm);\n"
+                                    "    M_FSM_New_ExpectAnyArgsAndReturn(&fsm);\n"
                                     "\n"
                                     "    TEST_ASSERT_EQUAL(true, " + self._sm_name + "_Init());\n"
                                     "}\n"
                                     "\n"
                                     "void test_TickIsCalled(void)\n"
                                     "{\n"
-                                    "    FSM_Tick_ExpectAnyArgs();\n"
+                                    "    M_FSM_Tick_ExpectAnyArgs();\n"
                                     "\n"
                                     "    " + self._sm_name + "_Tick();\n"
                                     "}\n"
