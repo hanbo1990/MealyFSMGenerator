@@ -4,6 +4,7 @@ import xml.sax
 from os.path import isfile
 from SMInfoParser.StateMachineInfo import StateJumpInfo
 from SMInfoParser.StateMachineInfoParser import SMInfoParser
+import re
 
 SM__STATE_JUMP = "state jump"
 SM__STATE_JUMP_PARENT = "state jump parent"
@@ -45,15 +46,20 @@ class StateMachineInfoExtractor(SMInfoParser):
         for item in st_list:
             if item.from_state not in state_list:
                 state_list.append(item.from_state)
-
-        state_list.sort()
+        
+        state_list.sort(key=lambda x: re.findall(r'[0-9]+',x)[0])
 
         for state in state_list:
             state_st_list = []
             for item in st_list:
-                if item.from_state is state:
+                if item.from_state == state:
+                    print(item.from_state)
+                    print(item.condition)
+                    print(item.to_state)
+                    print("")
                     state_st_list.append(item)
-            state_st_list.sort(key=lambda x: x.condition)
+            print(str(state_st_list))
+            state_st_list.sort(key=lambda x: re.findall(r'[0-9]+',x.condition)[0])
             for item in state_st_list:
                 ret_list.append(item)
 
@@ -82,7 +88,7 @@ class StateMachineInfoExtractor(SMInfoParser):
                     else:
                         if "source" in attributes.keys() and "target" in attributes.keys():
                             if attributes["parent"] == '1':
-                                if "value" in attributes.keys() and attributes["value"] is not "":
+                                if "value" in attributes.keys() and attributes["value"] != "":
                                     self.currentItem.type = SM__STATE_JUMP
                                     self.currentItem.value = attributes["value"]
                                     self.currentItem.source = attributes["source"]
