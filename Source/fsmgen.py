@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 import sys, getopt
+import os
 
 from SMInfoParser.DrawIoXMLParser import StateMachineInfoExtractor
 from CodeGenerator.CGenerator.CCodeGenerator import CCodeGenerator
@@ -23,6 +24,8 @@ def main(argv):
         elif opt in ("-i", "--ifile"):
             i_exist = True
             xml_path = arg
+            if os.path.isfile(xml_path) is False or ".xml" not in xml_path:
+                raise ValueError("invalid xml path")
         elif opt in ("-n", "--sm_name"):
             n_exist = True
             sm_name = arg

@@ -14,10 +14,8 @@ class StateJumpInfo:
         self.action = None
         # condition
         self.condition = None
-        # transition name
-        self.trans_name = None
 
-    def print(self):
+    def print_info(self):
         print("[X] In State [" + self.from_state + "] with condition [" + self.condition + "] should do [" +
               self.action + "] and go to state [" + self.to_state + "]\n")
 
