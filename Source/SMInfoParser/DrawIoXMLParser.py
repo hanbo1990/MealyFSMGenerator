@@ -57,6 +57,7 @@ class StateMachineInfoExtractor(SMInfoParser):
 
         def __update_transitions_list(self, cells, state_id_dict):
             self.__transition_list = []
+            err_str = 'source or target not connected on line where condition is {} and action is {}'
             for cell in cells:
                 cell_val = cell.attrs["value"]
                 cell_val = sub('<br\s*?>', '\n', cell_val)
@@ -64,15 +65,22 @@ class StateMachineInfoExtractor(SMInfoParser):
                     state_jump_info = StateJumpInfo()
                     state_jump_info.condition, state_jump_info.action = cell_val.split()
                     if "source" in cell.attrs.keys():
-                        state_jump_info.from_state = state_id_dict[cell.attrs["source"]]
-                        state_jump_info.to_state = state_id_dict[cell.attrs["target"]]
+                        try:
+                            state_jump_info.from_state = state_id_dict[cell.attrs["source"]]
+                            state_jump_info.to_state = state_id_dict[cell.attrs["target"]]
+                        except KeyError:
+                            raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
                     else:  
                         # the source and dest is deinfed in its parnet node (parent here means the parent in drawio, not xml)
                         parent = self.__soup.findAll("mxCell", {"id": cell.attrs["parent"]})
                         if len(parent) == 1:
                             parent = parent[0]
-                        state_jump_info.from_state = state_id_dict[parent.attrs["source"]]
-                        state_jump_info.to_state = state_id_dict[parent.attrs["target"]]
+
+                        try:
+                            state_jump_info.from_state = state_id_dict[parent.attrs["source"]]
+                            state_jump_info.to_state = state_id_dict[parent.attrs["target"]]
+                        except KeyError:
+                            raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
                     self.__transition_list.append(state_jump_info)
 
 
