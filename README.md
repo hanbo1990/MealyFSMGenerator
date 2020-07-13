@@ -1,8 +1,12 @@
 # MealyFSMGenerator ([Mealy](https://en.wikipedia.org/wiki/Mealy_machine))
 
-> version: [0.2.0](https://github.com/hanbo1990/FSMGenerator/tree/master)
+> version: [0.3.0](https://github.com/hanbo1990/FSMGenerator/tree/master)
 
-This mealy state machine generator will **generates c code together with its unit test** from [draw.io](https://www.draw.io) graph. The generator is written in a modular way, so it can easily extended to support other languages and other input sources.
+This mealy state machine generator will **generates c code together with its unit test** from:
+* [draw.io](https://www.draw.io) graph if the user likes to draw the design in format of picture. Generating from png not supported in current version of drawio but will come soon. [Example here.](#Example-drawio)
+* [graphviz](https://graphviz.org/) dot file if the user likes to draw graph in format of code. This allows more readable version tracking. [Example here.](#Example-graphviz)
+ 
+The generator is written in a modular way, so it can easily extended to support other languages and other input sources.
 
 Key words used in the state machine generator are **state**, **condition** and **transition function**. It can describe the mealy state machine behavior: In state A, condition occurs, state machine should call a transition function and go to state B. 
 
@@ -10,7 +14,22 @@ Key words used in the state machine generator are **state**, **condition** and *
 
 ## How to use
 
-### Step 1: Create the state machine graph.
+```bash
+'main.py -t <input type> -i <pathToInputFile> -n <StateMachineName>
+
+    -t : input type, now 'dot' or 'drawio' supported. defaulted to  'drawio'.
+
+    -i : path to the file, *.xml requried for drawio and *.dot required for dot
+
+    -n : Name of generated state machine
+```
+
+For input type drawio, python dependencies lxml and bs4 are required.
+
+---
+### Example Drawio
+
+#### Step 1: Create the state machine graph.
 
 State machine in draw.io can be created following the example given in below:
 
@@ -34,7 +53,7 @@ File->Export As->xml
 
 ![DontUseCompress](https://i.postimg.cc/ht0j8hbP/Screenshot-from-2019-10-19-14-03-30.png)
 
-### Step 2: Generate the code
+#### Step 2: Generate the code
 
 By calling:
 
@@ -44,7 +63,7 @@ main.py -i <pathToXML> -n <StateMachineName>
 
 After this step, you should be able to find the result in **Result** folder where you execute the main file.
 
-### Step 3: Execute Unit Test
+#### Step 3: Execute Unit Test
 
 In Result/unit_test/ folder, execute following command:
 
@@ -66,6 +85,43 @@ By enabling this unit_test, any manual change (exception is filling in the funct
 
 ---
 
+### Example graphviz
+
+graphviz is quite straight forward. Make sure at least you have states section and transitions section as below.
+
+```bash
+digraph G {
+    splines=polyline
+    node [style=filled];
+    
+    /* States */
+    state_start [label="1START"]
+    state_connecting [label="2CONNECTING"]
+    state_connected [label="3CONNECTED"]
+    
+    /* transitions */
+    state_start -> state_start[label="1NONE\nCheckIfTimeToConnect"]
+    state_start -> state_connecting[label="2READY_TO_CONNECT\nConnect"]
+    state_connecting -> state_start[label="3CONNECT_FAIL\nReset"]
+    state_connecting -> state_start[label="4DISCONNECTED\nReset"]
+    state_connecting -> state_connected[label="5CONNECT_SUCCESS\nNULL"]
+    state_connected -> state_connected[label="1NONE\nSayHello"]
+    state_connected -> state_start[label="4DISCONNECTED\nReset"]
+}
+```
+
+Example and its preview looks like below.
+
+![graphviz](https://i.postimg.cc/KvF57kHz/dot.png)
+
+```bash
+fsmgen.py -t dot -i Example/example.dot -n EXAMPLE
+```
+
+Will generate the expected results.
+
+---
+
 ## Result Folder
 
 ```bash
@@ -84,6 +140,13 @@ By enabling this unit_test, any manual change (exception is filling in the funct
 ```
 
 ---
-##　License
 
-Licensed under MIT.
+## License
+
+Copyright <2020> <COPYRIGHT Bo Han (hanbo1990@gmail.com)>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

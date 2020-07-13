@@ -1,0 +1,18 @@
+digraph G {
+    splines=polyline
+    node [style=filled];
+    
+    /* States */
+    state_start [label="1START"]
+    state_connecting [label="2CONNECTING"]
+    state_connected [label="3CONNECTED"]
+    
+    /* transitions */
+    state_start -> state_start[label="1NONE\nCheckIfTimeToConnect"]
+    state_start -> state_connecting[label="2READY_TO_CONNECT\nConnect"]
+    state_connecting -> state_start[label="3CONNECT_FAIL\nReset"]
+    state_connecting -> state_start[label="4DISCONNECTED\nReset"]
+    state_connecting -> state_connected[label="5CONNECT_SUCCESS\nNULL"]
+    state_connected -> state_connected[label="1NONE\nSayHello"]
+    state_connected -> state_start[label="4DISCONNECTED\nReset"]
+}

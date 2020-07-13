@@ -5,13 +5,7 @@ from re import (findall,
                 sub)
 from bs4 import BeautifulSoup
 
-
-SM__STATE_JUMP = "state jump"
-SM__STATE_JUMP_PARENT = "state jump parent"
-SM__STATE = "state"
-
-
-class StateMachineInfoExtractor(SMInfoParser):
+class DrawioSMInfoExtractor(SMInfoParser):
     """
     State Machine information extractor, this class help extract information from draw.io graph
     """
@@ -25,6 +19,8 @@ class StateMachineInfoExtractor(SMInfoParser):
         :param file_path: path to the file
         :return:
         """
+        if ".xml" not in file_path:
+            raise ValueError("xml file expected but get " + file_path)
         state_machine_content_handler = self.__StateMachineContentHandler(file_path)
         return state_machine_content_handler.get_transition_list()
 
