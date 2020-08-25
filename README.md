@@ -1,9 +1,9 @@
 # MealyFSMGenerator ([Mealy](https://en.wikipedia.org/wiki/Mealy_machine))
 
-> version: [0.3.0](https://github.com/hanbo1990/FSMGenerator/tree/master)
+> version: [0.4.0](https://github.com/hanbo1990/FSMGenerator/tree/master)
 
 This mealy state machine generator will **generates c code together with its unit test** from:
-* [draw.io](https://www.draw.io) graph if the user likes to draw the design in format of picture. Generating from png not supported in current version of drawio but will come soon. [Example here.](#Example-drawio)
+* [draw.io](https://www.draw.io) graph if the user likes to draw the design in format of picture. Generating from png is supported in current version. [Example here.](#Example-drawio)
 * [graphviz](https://graphviz.org/) dot file if the user likes to draw graph in format of code. This allows more readable version tracking. [Example here.](#Example-graphviz)
  
 The generator is written in a modular way, so it can easily extended to support other languages and other input sources.
@@ -19,7 +19,7 @@ Key words used in the state machine generator are **state**, **condition** and *
 
     -t : input type, now 'dot' or 'drawio' supported. defaulted to  'drawio'.
 
-    -i : path to the file, *.xml requried for drawio and *.dot required for dot
+    -i : path to the file, *.png requried for drawio and *.dot required for dot
 
     -n : Name of generated state machine
 ```
@@ -39,26 +39,24 @@ Patterns to follow:
 
 > 1. States should start with unique number
 > 2. Condition should start with unique number
-> 3. Transition with single direction arrow should start from one state to another state. 
+> 3. Transition with single direction arrow should start from one state to another state.
 > 4. Each transition line should come with condition and transition function in a new line.
 > 5. Condition and transition function must be created on the transition line (not creating a text and move to the line).
 
-Once the graph is generated, use drawio build-in export function to export the graph in xml format by:
+Once the graph is generated, use drawio build-in export function to export the graph in png format by:
 
 ```bash
-File->Export As->xml
+File->Export As->png
 ```
 
-**Ｍake sure don't select compressed.**
-
-![DontUseCompress](https://i.postimg.cc/ht0j8hbP/Screenshot-from-2019-10-19-14-03-30.png)
+Always choose include a copy of diagram in the png.
 
 #### Step 2: Generate the code
 
 By calling:
 
 ```bash
-main.py -i <pathToXML> -n <StateMachineName>
+main.py -i <pathToPng> -n <StateMachineName>
 ```
 
 After this step, you should be able to find the result in **Result** folder where you execute the main file.

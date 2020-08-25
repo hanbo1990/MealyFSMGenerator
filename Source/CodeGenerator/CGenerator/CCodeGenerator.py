@@ -146,6 +146,14 @@ class CCodeGenerator(CodeGenerator):
 
         list_nr = len(self._priv_condi_name_list)
         file_descriptor.write("typedef enum{\n")
+        none_condition_exist = False
+        condition_none_name = sm_condition_common(self._sm_name) + "NONE"
+        for i in range(0, list_nr):
+            if condition_none_name in self._priv_condi_name_list[i]:
+                none_condition_exist = True
+                break;
+        if none_condition_exist is False:
+            self._priv_condi_name_list.insert(0, condition_none_name)
         for i in range(0, list_nr):
             file_descriptor.write("    " + self._priv_condi_name_list[i] + ",\n")
         file_descriptor.write("    " + sm_condition_common(self._sm_name) + "END,\n")

@@ -58,27 +58,46 @@ class DrawioSMInfoExtractor(SMInfoParser):
                 cell_val = cell.attrs["value"]
                 cell_val = sub('<br\s*?>', '\n', cell_val)
                 if '\n' in cell_val: # cell is transition
-                    state_jump_info = StateJumpInfo()
-                    state_jump_info.condition, state_jump_info.action = cell_val.split()
-                    if "source" in cell.attrs.keys():
-                        try:
-                            state_jump_info.from_state = state_id_dict[cell.attrs["source"]]
-                            state_jump_info.to_state = state_id_dict[cell.attrs["target"]]
-                        except KeyError:
-                            raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
-                    else:  
-                        # the source and dest is deinfed in its parnet node (parent here means the parent in drawio, not xml)
-                        parent = self.__soup.findAll("mxCell", {"id": cell.attrs["parent"]})
-                        if len(parent) == 1:
-                            parent = parent[0]
+                    try:
+                        state_jump_info = StateJumpInfo()
+                        state_jump_info.condition, state_jump_info.action = cell_val.split()
+                        if "source" in cell.attrs.keys():
+                            try:
+                                state_jump_info.from_state = state_id_dict[cell.attrs["source"]]
+                                state_jump_info.to_state = state_id_dict[cell.attrs["target"]]
+                            except KeyError:
+                                raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
+                        else:  
+                            # the source and dest is deinfed in its parnet node (parent here means the parent in drawio, not xml)
+                            parent = self.__soup.findAll("mxCell", {"id": cell.attrs["parent"]})
+                            if len(parent) == 1:
+                                parent = parent[0]
 
-                        try:
-                            state_jump_info.from_state = state_id_dict[parent.attrs["source"]]
-                            state_jump_info.to_state = state_id_dict[parent.attrs["target"]]
-                        except KeyError:
-                            raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
-                    self.__transition_list.append(state_jump_info)
+                            try:
+                                state_jump_info.from_state = state_id_dict[parent.attrs["source"]]
+                                state_jump_info.to_state = state_id_dict[parent.attrs["target"]]
+                            except KeyError:
+                                raise RuntimeError(err_str.format(state_jump_info.condition, state_jump_info.action))
+                        self.__transition_list.append(state_jump_info)
+                    except:
+                        # not interesting cell
+                        pass
+            self.__clean_up_fonts()
+            
 
+        def __clean_up_fonts(self):
+            for transition in self.__transition_list:
+                if "font" in transition.from_state:
+                    new_state = findall(r">[A-Z|0-9|_|a-z]+<", transition.from_state)[0]
+                    new_state = new_state[1:len(new_state) - 1]
+                    transition.from_state = new_state
+                if "font" in transition.to_state:
+                    new_state = findall(r">[A-Z|0-9|_|a-z]+<", transition.to_state)[0]
+                    new_state = new_state[1:len(new_state) - 1]
+                    transition.to_state = new_state
+                transition.condition = findall(r"[A-Z|0-9|_|a-z]+", transition.condition)[0]
+                transition.action = findall(r"[A-Z|0-9|_|a-z]+", transition.action)[0]
+                
 
         @staticmethod
         def __get_state_id_mapping_dict(cells):
